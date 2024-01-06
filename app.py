@@ -3,30 +3,35 @@ import cv2
 import numpy as np
 
 def edge_detection(input_image, lower_threshold=50, upper_threshold=150, edge_thickness=1):
-    # Convert PIL Image to NumPy array
-    img = np.array(input_image)
+    try:
+        # Convert PIL Image to NumPy array
+        img = np.array(input_image)
 
-    # Check if the image is in grayscale format
-    if len(img.shape) == 2:
-        gray = img  # Already grayscale
-    else:
-        # Convert the image to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Check if the image is in grayscale format
+        if len(img.shape) == 2:
+            gray = img  # Already grayscale
+        else:
+            # Convert the image to grayscale
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Apply Gaussian blur to reduce noise and improve edge detection
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # Apply Gaussian blur to reduce noise and improve edge detection
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    # Apply Canny edge detection
-    edges = cv2.Canny(blurred, lower_threshold, upper_threshold)
+        # Apply Canny edge detection
+        edges = cv2.Canny(blurred, lower_threshold, upper_threshold)
 
-    # Create a blank image to draw the thickened edges
-    thick_edges = np.zeros_like(img)
+        # Create a blank image to draw the thickened edges
+        thick_edges = np.zeros_like(img)
 
-    # Draw the thickened edges on the blank image
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    thick_edges = cv2.drawContours(thick_edges, contours, -1, (255, 255, 255), thickness=edge_thickness)
+        # Draw the thickened edges on the blank image
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        thick_edges = cv2.drawContours(thick_edges, contours, -1, (255, 255, 255), thickness=edge_thickness)
 
-    return thick_edges
+        return thick_edges
+
+    except Exception as e:
+        st.error(f"Error in edge_detection: {e}")
+        return None
 
 def main():
     st.title("Stamp Seal Maker with Edge Detection")
@@ -48,8 +53,9 @@ def main():
             # Perform edge detection with thickness adjustment
             thick_edges = edge_detection(uploaded_file, lower_threshold, upper_threshold, edge_thickness)
 
-            # Display the result
-            st.image(thick_edges, caption="Edge Detection Result with Thickness.", use_column_width=True)
+            if thick_edges is not None:
+                # Display the result
+                st.image(thick_edges, caption="Edge Detection Result with Thickness.", use_column_width=True)
 
 if __name__ == "__main__":
     main()
